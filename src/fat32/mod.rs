@@ -92,4 +92,40 @@ impl<D: BlockDevice> Fat32<D> {
 
         Ok(count)
     }
+        pub fn read_dir_chain(
+        &mut self,
+        start_cl: u32,
+        buf: &mut [u8],
+        out: &mut [dirent::ShortDirEntry],
+    ) -> Result<usize, FsError> {
+        let mut total = 0usize;
+        let mut cl = start_cl;
+        let mut fat_buf = [0u8; 512];
+
+        loop {
+            let got = self.read_dir_once(cl, buf, &mut out[total..])?;
+            total += got;
+            if total >= out.len() {
+                break;
+            }
+
+            let next = self.next_cluster(cl, &mut fat_buf)?;
+            if next >= table::EOF || next < 2 {
+                break;
+            }
+            cl = next;
+        }
+
+        Ok(total)
+    }
+
+    pub fn read_root_dir(
+        &mut self,
+        buf: &mut [u8],
+        out: &mut [dirent::ShortDirEntry],
+    ) -> Result<usize, FsError> {
+        let root = self.bpb.fat32.root_cluster;
+        self.read_dir_chain(root, buf, out)
+    }
+
 }
