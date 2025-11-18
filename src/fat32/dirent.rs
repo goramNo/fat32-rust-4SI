@@ -2,7 +2,7 @@
 pub const ATTR_LFN: u8 = 0x0F;
 
 #[repr(C, packed)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub struct ShortDirEntry {
     pub name: [u8; 11],
     pub attr: u8,
