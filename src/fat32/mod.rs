@@ -92,7 +92,8 @@ impl<D: BlockDevice> Fat32<D> {
 
         Ok(count)
     }
-        pub fn read_dir_chain(
+
+    pub fn read_dir_chain(
         &mut self,
         start_cl: u32,
         buf: &mut [u8],
@@ -127,7 +128,8 @@ impl<D: BlockDevice> Fat32<D> {
         let root = self.bpb.fat32.root_cluster;
         self.read_dir_chain(root, buf, out)
     }
-        pub fn read_file(
+
+    pub fn read_file(
         &mut self,
         entry: &dirent::ShortDirEntry,
         buf: &mut [u8],
@@ -140,13 +142,16 @@ impl<D: BlockDevice> Fat32<D> {
         let bytes_per_cluster = (spc as usize) * 512;
 
         while cl >= 2 && cl < table::EOF && off < buf.len() && off < size {
-            let mut tmp = [0u8; 4096]; // supporte jusqu'à 8 secteurs/cluster
-            let need = bytes_per_cluster.min(tmp.len());
+            let mut tmp = [0u8; 4096];
+            let need = core::cmp::min(bytes_per_cluster, tmp.len());
             self.read_cluster(cl, &mut tmp[..need])?;
 
             let remain_file = size - off;
             let remain_buf = buf.len() - off;
-            let to_copy = core::cmp::min(remain_file, core::cmp::min(remain_buf, bytes_per_cluster));
+            let to_copy = core::cmp::min(
+                remain_file,
+                core::cmp::min(remain_buf, bytes_per_cluster),
+            );
 
             buf[off..off + to_copy].copy_from_slice(&tmp[..to_copy]);
             off += to_copy;
@@ -164,6 +169,4 @@ impl<D: BlockDevice> Fat32<D> {
 
         Ok(off)
     }
-
-
 }
