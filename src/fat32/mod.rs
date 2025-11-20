@@ -59,6 +59,11 @@ impl<D: BlockDevice> Fat32<D> {
         }
         Ok(())
     }
+    /// Lit un cluster de répertoire et récupère les entrées courtes valides.
+    ///
+    /// # Safety
+    /// Lit des structures packées depuis un buffer de 512*n octets avec
+    /// `read_unaligned`. On suppose que le buffer vient bien du device FAT32.
 
     pub fn read_dir_once(
         &mut self,

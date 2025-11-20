@@ -23,6 +23,10 @@ static GLOBAL: BumpAlloc = BumpAlloc {
 };
 
 unsafe impl GlobalAlloc for BumpAlloc {
+
+    /// # Safety
+    /// Accède à un buffer global unique via `UnsafeCell`. On suppose que
+    /// l'allocateur est le seul à écrire dans cette zone mémoire.
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         let align = layout.align();
         let size = layout.size();

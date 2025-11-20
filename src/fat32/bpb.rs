@@ -40,7 +40,13 @@ pub struct BootSector {
     pub fat32: BpbFat32Ext,
 }
 
-impl BootSector {
+impl BootSector {    
+    /// Parse un secteur de boot FAT32 (512 octets).
+    ///
+    /// # Safety
+    /// Utilise des accès `read_unaligned` sur des données brutes.
+    /// On suppose que le buffer fait au moins 512 octets.
+    
     pub fn parse(sec: &[u8]) -> Result<Self, FsError> {
         if sec.len() < 512 { return Err(FsError::Parse); }
         if sec[510] != 0x55 || sec[511] != 0xAA { return Err(FsError::BadSig); }
